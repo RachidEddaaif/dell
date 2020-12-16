@@ -1,6 +1,6 @@
-#include "ai.h"
-#include "engine.h"
-#include "state.h"
+#include "../ai.h"
+#include "../engine.h"
+#include "../state.h"
 #include <iostream>
 #include <stdlib.h>
 #include <unistd.h>
@@ -13,12 +13,13 @@ using namespace std;
 
 void RandomAI::run(engine::Engine &engine)
 {
-    int randomCharSelected = selectCharacter(engine.getState());
-    cout << randomCharSelected << endl;
+    int randomCharSelected = selectCharacter(engine.currentState);
+    cout << "Selected :" << randomCharSelected << endl;
     // always select someone
-    Character &selectedChar = *engine.getState().getCharacters()[randomCharSelected];
+    Character &selectedChar = *engine.currentState.getCharacters()[randomCharSelected];
     unique_ptr<Command> selectCommand(new SelectCharacterCommand(selectedChar));
     engine.addCommand(move(selectCommand));
+    engine.init();
 
     // can attack?
     //if (selectedChar.allowedTargetsToAttack(engine.getState()).size() > 0)
@@ -99,16 +100,21 @@ void RandomAI::run(engine::Engine &engine)
 int RandomAI::selectCharacter (state::State& state){
     std::vector<int> posibleIndex;
 
-    for(unsigned int i = 0; i < state.getCharacters().size(); i++){
+    unsigned int k = state.getCharacters().size();
+    cout << "size : " << k << endl;
+    for(unsigned int i = 0; i < k; i++){
         Character &charac = *state.getCharacters()[i];
-        if(state.getTurnOwner() == playerNumber && charac.getStatus() != DEAD)
+        if(charac.getStatus() != DEAD){
             posibleIndex.push_back(i);
+        }
     }
 
-    int randomNumber = rand() % posibleIndex.size();
-    cout << "[";
+    //int randomNumber = rand() % posibleIndex.size();
+    //only 2 players for now
+    int randomNumber = rand() % 2;
+    cout << "Possible index : [";
     for(auto &index : posibleIndex){
-        cout << index << ", ";
+        cout  << index << ", ";
     }
     cout << "]" << endl;
     return posibleIndex[randomNumber];
